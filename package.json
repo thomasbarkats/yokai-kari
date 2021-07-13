@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "commit": "format-commit"
+  },
+  "devDependencies": {
+    "format-commit": "^0.1.10"
+  }
+}
