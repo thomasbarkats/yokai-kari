@@ -1,6 +1,17 @@
 {
+  "name": "yokai-kari",
+  "description": "Yōkai kari",
   "scripts": {
-    "commit": "format-commit"
+    "postinstall": "cd server && npm i",
+    "start": "npm run start:server && npm run start:client",
+    "start:server": "cd server && npm run start",
+    "start:client": "cd client && echo \"Not implemented\"",
+    "commit": "npm run lint:server && npm run lint:client && format-commit",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd server && echo \"Not implemented\"",
+    "server": "cd server && npm run debug",
+    "api": "npm run server",
+    "client": "echo \"Not implemented\" && exit 1"
   },
   "devDependencies": {
     "format-commit": "^0.1.10"
