@@ -1,7 +1,9 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Res, Response } from 'yasui';
-import { IUser, User } from '../../domain';
+import { Body, Controller, Get, HttpStatus, Param, Post, Put, Query, Res, Response } from 'yasui';
+import { AuthRequiredMiddleware } from '../middlewares/auth-required.middleware';
+import { IAuthUser, ISpawn, IUser, User } from '../../domain';
 import { UserResource } from '../resources';
 import { UsersService } from '../services';
+import { AuthUser } from '../decorators.provider';
 
 
 @Controller('/users')
@@ -26,7 +28,7 @@ export class UsersController {
 
 
     @Get('/:username')
-    private async getPublicProfile(
+    private async getProfile(
         @Param('username') username: string,
         @Res() res: Response
     ): Promise<void> {
@@ -34,5 +36,43 @@ export class UsersController {
         res.status(HttpStatus.OK).json(
             new UserResource(user)
         );
+    }
+
+    @Get('/:username/bestiary')
+    private async getCaptures(
+        @Param('username') username: string,
+        @Res() res: Response
+    ): Promise<void> {
+        const user: IUser = await this.userService.get(username);
+        res.status(HttpStatus.OK).json(user.bestiary);
+    }
+
+    @Get('/:username/spawns', AuthRequiredMiddleware)
+    private async genSpawns(
+        @AuthUser() user: IAuthUser,
+        @Param('username') username: string,
+        @Res() res: Response
+    ): Promise<void> {
+        if (user.username !== username) {
+            res.status(HttpStatus.FORBIDDEN);
+        }
+        const spawns: ISpawn[] = await this.userService.genSpawns(user.id);
+        res.status(HttpStatus.OK).json(spawns);
+    }
+
+    @Put('/:username/location', AuthRequiredMiddleware)
+    private async updateLocation(
+        @AuthUser() user: IAuthUser,
+        @Param('username') username: string,
+        @Query('lon') lon: number,
+        @Query('lat') lat: number,
+        @Res() res: Response
+    ): Promise<void> {
+        if (user.username !== username) {
+            res.status(HttpStatus.FORBIDDEN);
+        }
+        await this.userService.setLocation(user.id, { lon, lat });
+        const reachedSpawns: ISpawn[] = await this.userService.getCloseSpawns(user.id);
+        res.status(HttpStatus.OK).json(reachedSpawns);
     }
 }

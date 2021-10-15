@@ -37,10 +37,4 @@ export class UserRepository extends DomainRepository<IUserDocument, IUser> {
             .exec();
         return doc as IUser;
     }
-
-    public async setLocation(id: string, location: Point): Promise<void> {
-        await this.update(id, {
-            $set: { location }
-        });
-    }
 }

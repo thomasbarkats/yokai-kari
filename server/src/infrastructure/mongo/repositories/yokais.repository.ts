@@ -9,7 +9,7 @@ import { DomainRepository } from './domain.repository';
 export class YokaiRepository extends DomainRepository<IYokaiDocument, IYokai> {
 
     constructor(
-        @Inject('EVENT_DOCUMENT') private yokaiDocument: Model<IYokaiDocument>,
+        @Inject('YOKAI_DOCUMENT') private yokaiDocument: Model<IYokaiDocument>,
     ) {
         super(yokaiDocument);
     }

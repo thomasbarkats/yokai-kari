@@ -1,3 +1,4 @@
+import { randomCirclePoint } from '../../application/services/utils/geo.service';
 import { Point } from './domain.model';
 import { IYokai } from './yokai.model';
 
@@ -15,7 +16,7 @@ export class Spawn implements ISpawn {
 
     constructor(yokai: IYokai, pos: Point) {
         this.date = new Date();
-        this.location = { lon: 0, lat: 0 }; // TODO: Generate random location from pos;
+        this.location = randomCirclePoint(pos, 20); // meters
         this.yokai = yokai;
     }
 }

@@ -1,4 +1,4 @@
-import { ConfigService, HttpStatus, Injectable } from 'yasui';
+import { ConfigService, HttpStatus, Injectable, LoggerService } from 'yasui';
 import { FormException, HttpException, IUser } from '../../domain';
 import { UserRepository } from '../../infrastructure';
 import { MailerService } from './mailer.service';
@@ -15,6 +15,7 @@ export class AuthService {
     constructor(
         private mailerService: MailerService,
         private userRepository: UserRepository,
+        private loggerService: LoggerService,
     ) {}
 
 
@@ -39,6 +40,11 @@ export class AuthService {
             length: 6,
             charset: 'numeric',
         });
+
+        /** display code in development mode for debugging */
+        if (ConfigService.get('ENV') === 'development') {
+            this.loggerService.debug(`otp: ${tempCode}`);
+        }
 
         /** save an hash version of generated temp-code */ 
         const hash: string = hashSync(tempCode, 8);
@@ -87,11 +93,8 @@ export class AuthService {
             this.userRepository.updateField(uid, 'tempCode', null);
             throw new HttpException(HttpStatus.FORBIDDEN, 'Expired code');
         }
-        if (!compareSync(
-            twoFactorCode,
-            replace(user.tempCode.hash, ' ', '')
-        )) {
-            throw new FormException(['code']);
+        if (!compareSync(replace(twoFactorCode, ' ', ''), user.tempCode.hash)) {
+            throw new FormException(['otp']);
         }
         /** reset temp-code */
         await this.userRepository.updateField(uid, 'tempCode', null);

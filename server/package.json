@@ -11,7 +11,8 @@
     "start": "tsc && node ./dist/app.js",
     "start:development": "npm run debug",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "commit": "cd ../ && npm run commit"
   },
   "author": "Thomas BARKATS, Tony D'ANDRIA",
   "dependencies": {
@@ -35,8 +36,7 @@
     "@typescript-eslint/parser": "^4.22.0",
     "dotenv": "^8.2.0",
     "eslint": "^7.25.0",
-    "format-commit": "^0.1.10",
     "nodemon": "^2.0.7",
-    "typescript": "^4.2.4"
+    "typescript": "^4.4.4"
   }
 }
