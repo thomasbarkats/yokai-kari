@@ -10,6 +10,10 @@ export class FrontPageComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+
+
   }
+
+
 
 }
