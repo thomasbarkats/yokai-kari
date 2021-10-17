@@ -1,10 +1,10 @@
 import { ConfigService, HttpStatus, Injectable } from 'yasui';
-import { HttpException, ISpawn, IUser, IYokai, Spawn, Point } from '../../domain';
+import { HttpException, ISpawn, IUser, IYokai, Spawn, Point, ICapture, Capture } from '../../domain';
 import { UserRepository, YokaiRepository } from '../../infrastructure';
 import { MailerService } from './mailer.service';
 import { AuthService } from './auth.service';
 import moment from 'moment';
-import { random, toNumber } from 'lodash';
+import { cloneDeep, random, remove, toNumber, toString, uniqBy } from 'lodash';
 import { distance } from './utils/geo.service';
 
 
@@ -81,10 +81,38 @@ export class UsersService {
         return this.userRepository.updateField(uid, 'location', pos);
     }
 
-    public async getCloseSpawns(uid: string): Promise<ISpawn[]> {
+    public async getNearbySpawns(uid: string): Promise<ISpawn[]> {
         const user: IUser = await this.userRepository.getById(uid);
         return user.spawns.filter((spawn: ISpawn) =>
             distance(spawn.location, user.location) <= toNumber(ConfigService.get('GEO_SENSIBILITY'))
         );
+    }
+
+    public async addInBestiary(uid: string, spawns: ISpawn[]): Promise<ICapture[]> {
+        const user: IUser = await this.userRepository.getById(uid);
+        const remainingSpawns: ISpawn[] = cloneDeep(user.spawns);
+
+        const newCaptures: ICapture[] = [];
+        spawns.forEach((spawn: ISpawn) => {
+            const capture: ICapture | undefined = user.bestiary.find((cap: ICapture) =>
+                toString(cap.yokai) === toString(spawn.yokai)
+            );
+            if (capture) {
+                capture.number++;
+                capture.dates.push(new Date());
+                capture.locations.push(spawn.location);
+                newCaptures.push(capture);
+            } else {
+                newCaptures.push(new Capture(spawn));
+            }
+            remove(remainingSpawns, (sp: ISpawn) => Spawn.copy(sp).isEqual(spawn));
+        });
+
+        await this.userRepository.updateField(uid, 'spawns', remainingSpawns);
+        await this.userRepository.updateField(uid, 'bestiary', uniqBy(
+            [...user.bestiary, ...newCaptures],
+            (cpt: ICapture) => toString(cpt.yokai),
+        ));
+        return newCaptures;
     }
 }
