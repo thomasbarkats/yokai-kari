@@ -1,5 +1,5 @@
 import { Middleware, Next, NextFunction, Req, Request } from 'yasui';
-import { AuthException, IUser } from '../../domain';
+import { AuthException, IAuthUser, IUser } from '../../domain';
 import { UserRepository } from '../../infrastructure';
 import { AuthUser } from '../decorators.provider';
 import { set } from 'lodash';
@@ -15,7 +15,7 @@ export class AuthRequiredMiddleware {
 
     async use(
         @Req() req: Request,
-        @AuthUser() userFromToken: IUser,
+        @AuthUser() userFromToken: IAuthUser,
         @Next() next: NextFunction,
     ): Promise<void> {
         if (!userFromToken || !userFromToken.id || !userFromToken.authKey) {

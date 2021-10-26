@@ -1,11 +1,12 @@
 import { ConfigService, HttpStatus, Injectable } from 'yasui';
 import { HttpException, ISpawn, IUser, IYokai, Spawn, Point, ICapture, Capture } from '../../domain';
-import { UserRepository, YokaiRepository } from '../../infrastructure';
+import { UserRepository } from '../../infrastructure';
 import { MailerService } from './mailer.service';
 import { AuthService } from './auth.service';
 import moment from 'moment';
 import { cloneDeep, random, remove, toNumber, toString, uniqBy } from 'lodash';
 import { distance } from './utils/geo.service';
+import { YokaisService } from './yokais.service';
 
 
 @Injectable()
@@ -15,7 +16,7 @@ export class UsersService {
         private authService: AuthService,
         private mailerService: MailerService,
         private userRepository: UserRepository,
-        private yokaiRepository: YokaiRepository,
+        private yokaiService: YokaisService,
     ) {}
 
 
@@ -44,8 +45,13 @@ export class UsersService {
         return user;
     }
 
+    public async getBestiary(uid: string): Promise<ICapture[]> {
+        const user: IUser = await this.userRepository.getById(uid, ['bestiary.yokai']);
+        return user.bestiary;
+    }
+
     public async genSpawns(uid: string): Promise<ISpawn[]> {
-        const user: IUser = await this.userRepository.getById(uid);
+        const user: IUser = await this.userRepository.getById(uid, ['spawns.yokai']);
         const spawns: ISpawn[] = [];
 
         // Keep non-expired spawns
@@ -65,12 +71,12 @@ export class UsersService {
             const min: number = toNumber(ConfigService.get('MIN_GEN_SPAWNS'));
             const rand: number = random(gap - min < 0 ? 0 : min, gap);
 
-            const mockupYokai: IYokai = await this.yokaiRepository.getById('61697e9483118085e78a9286');
-
-            new Array(rand).fill(0).forEach(() => {
-                const randYokai: IYokai = mockupYokai; // TODO: Call Yokai service to get random one
-                spawns.push(new Spawn(randYokai, user.location));
-            });
+            // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+            for (let i: number = 0; i < rand; i++) {
+                const randYokai: IYokai = await this.yokaiService.getRandomOne();
+                const genRadius: number = toNumber(ConfigService.get('GEO_RADIUS'));
+                spawns.push(new Spawn(randYokai, user.location, genRadius));
+            }
         }
 
         await this.userRepository.updateField(uid, 'spawns', spawns);
@@ -82,20 +88,20 @@ export class UsersService {
     }
 
     public async getNearbySpawns(uid: string): Promise<ISpawn[]> {
-        const user: IUser = await this.userRepository.getById(uid);
+        const user: IUser = await this.userRepository.getById(uid, ['spawns.yokai']);
         return user.spawns.filter((spawn: ISpawn) =>
             distance(spawn.location, user.location) <= toNumber(ConfigService.get('GEO_SENSIBILITY'))
         );
     }
 
     public async addInBestiary(uid: string, spawns: ISpawn[]): Promise<ICapture[]> {
-        const user: IUser = await this.userRepository.getById(uid);
+        const user: IUser = await this.userRepository.getById(uid, ['spawns.yokai', 'bestiary.yokai']);
         const remainingSpawns: ISpawn[] = cloneDeep(user.spawns);
 
         const newCaptures: ICapture[] = [];
         spawns.forEach((spawn: ISpawn) => {
             const capture: ICapture | undefined = user.bestiary.find((cap: ICapture) =>
-                toString(cap.yokai) === toString(spawn.yokai)
+                toString(cap.yokai.id) === toString(spawn.yokai.id)
             );
             if (capture) {
                 capture.number++;

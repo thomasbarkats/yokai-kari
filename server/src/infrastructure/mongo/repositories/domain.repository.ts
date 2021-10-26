@@ -1,4 +1,4 @@
-import { get, isObject } from 'lodash';
+import { get, isObject, map } from 'lodash';
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { Injectable } from 'yasui';
 import { FormException } from '../../../domain';
@@ -23,6 +23,15 @@ export class DomainRepository<D extends IDocument & M, M> {
             .exec();
 
         return doc as M;
+    }
+
+    public async getAll(populate?: string[]): Promise<M[]> {
+        const docs: D[] = await this.document
+            .find()
+            .populate(populate)
+            .exec();
+
+        return map(docs, (doc: D) => doc as M);
     }
 
     public async save(model: M): Promise<M> {

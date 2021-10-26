@@ -1,7 +1,6 @@
 import { Model } from 'mongoose';
 import { Inject, Injectable } from 'yasui';
 import { IUser } from '../../../domain';
-import { Point } from '../../../domain/models/domain.model';
 import { IUserDocument } from '../documents.provider';
 import { DomainRepository } from './domain.repository';
 

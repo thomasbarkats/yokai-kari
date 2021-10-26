@@ -1,13 +1,14 @@
 import { connect, connection, ConnectOptions } from 'mongoose';
 import yasui, { ConfigService, LoggerService } from 'yasui';
-import { UsersController, AuthMiddleware, AuthController } from './application';
+import { UsersController, AuthMiddleware, AuthController, YokaisController } from './application';
 import { provideDocuments } from './infrastructure';
 
 
 yasui.createServer({
     controllers: [
-        UsersController,
         AuthController,
+        UsersController,
+        YokaisController,
     ],
     middlewares: [AuthMiddleware],
     injections: [...provideDocuments],
