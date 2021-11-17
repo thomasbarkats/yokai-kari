@@ -7,7 +7,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "debug": "cp dev.env .env && DEV=* nodemon",
+    "debug": "cp env/dev.env .env && DEV=* nodemon",
     "start:development": "npm run debug",
     "start": "node ./dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
