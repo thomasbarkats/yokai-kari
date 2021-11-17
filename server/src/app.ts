@@ -15,7 +15,6 @@ yasui.createServer({
     environment: process.env.ENV,
     port: process.env.PORT,
     debug: process.env.DEV !== undefined,
-    apiKey: process.env.API_KEY,
 });
 
 

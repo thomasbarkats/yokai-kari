@@ -4,7 +4,7 @@ import { UserRepository } from '../../infrastructure';
 import { MailerService } from './mailer.service';
 import { sign } from 'jsonwebtoken';
 import { generate } from 'randomstring';
-import { compareSync, hashSync } from 'bcrypt';
+import { compareSync, hashSync } from 'bcryptjs';
 import moment from 'moment';
 import { replace, toNumber } from 'lodash';
 

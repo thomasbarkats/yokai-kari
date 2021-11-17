@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Yōkai kari</string>
+    <string name="app_name">MapsTP</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

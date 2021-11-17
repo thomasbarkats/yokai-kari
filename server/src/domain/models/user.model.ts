@@ -1,4 +1,4 @@
-import { hashSync } from 'bcrypt';
+import { hashSync } from 'bcryptjs';
 import { toLower, trim } from 'lodash';
 import { FormException } from '../exceptions';
 import { ICapture } from './capture.model';
