@@ -9,6 +9,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,12 +31,15 @@ import com.thomasbarkats.mapstp.model.beans.SpawnBean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Predicate;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Button captureBtn;
+    private Button captureText;
     private List<SpawnBean> spawns = new ArrayList();
     private List<SpawnBean> nearbySpawns = new ArrayList();
 
@@ -47,6 +51,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         captureBtn = findViewById(R.id.btn_capture);
+        captureText = findViewById(R.id.txt_capture);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -88,7 +93,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         try {
                             // update user's location
                             nearbySpawns = WSUtils.updateLocation(location.getLongitude(), location.getLatitude());
-                            Log.w("sp_test", nearbySpawns.toString());
+
                             // re-generate spawns
                             spawns = WSUtils.generateSpawns();
                         } catch (Exception e) {
@@ -131,6 +136,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void run() {
                 try {
                     List<CaptureBean> captures = WSUtils.captureNearbySpawns();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // show capture information
+                            if (captures.size() > 1) {
+                                captureText.setText(captures.size() + " yokais captured!");
+                            } else {
+                                captureText.setText(captures.get(0).getYokai().getName() + " captured!");
+                            }
+                            captureText.setVisibility(View.VISIBLE);
+                            captureBtn.setVisibility(View.INVISIBLE);
+
+                            // hide text after moment
+                            TimerTask task = new TimerTask() {
+                                public void run() {
+                                    captureText.setVisibility(View.INVISIBLE);
+                                }
+                            };
+                            new Timer("hide_capture_text").schedule(task, 1000);
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -154,7 +180,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 mMap.clear();
 
-                if (nearbySpawns.size() > 0) {
+                if (nearbySpawns.size() > 1) {
+                    captureBtn.setVisibility(View.VISIBLE);
+                    captureBtn.setText("Capture " + nearbySpawns.size() + " yokais");
+                } else if (nearbySpawns.size() > 0) {
                     captureBtn.setVisibility(View.VISIBLE);
                     captureBtn.setText("Capture " + nearbySpawns.get(0).getYokai().getName());
                 } else {

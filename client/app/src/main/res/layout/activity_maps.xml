@@ -24,12 +24,20 @@
         android:orientation="vertical">
 
         <Button
+            android:id="@+id/txt_capture"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:backgroundTint="#777"
+            android:visibility="invisible"
+            android:text="" />
+
+        <Button
             android:id="@+id/btn_capture"
             android:layout_width="match_parent"
             android:layout_height="54dp"
-            android:text="Capture"
             android:backgroundTint="@color/white"
-            android:onClick="onClickCaptureBtn"/>
+            android:onClick="onClickCaptureBtn"
+            android:text="Capture" />
     </LinearLayout>
 
 
