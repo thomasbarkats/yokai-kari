@@ -14,4 +14,12 @@ public class YokaiBean {
         this.occurrence = occurrence;
         this.value = value;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Float getValue() {
+        return value;
+    }
 }

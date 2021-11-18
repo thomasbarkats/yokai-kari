@@ -1,9 +1,15 @@
 package com.thomasbarkats.mapstp.model.beans;
 
-import java.util.Date;
-
 public class SpawnBean {
-    private Date date;
+    private String date;
     private PointBean location;
     private YokaiBean yokai;
+
+    public PointBean getLocation() {
+        return location;
+    }
+
+    public YokaiBean getYokai() {
+        return yokai;
+    }
 }
